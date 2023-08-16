@@ -12,7 +12,8 @@ def csv_to_geojson(src_path, dst_path):
 
     ### 用 Pint() 建立 一堆feature() 存進 features
     features = datas.apply(
-        lambda row: Feature(geometry   = Point( ( float(row['X']), float(row['Y']) ) ),), axis=1).tolist()
+        lambda row: Feature(geometry   = Point( ( float(row['X']), float(row['Y']) ) ),
+                            properties = {"id": row["id"], "ship_name": row["ship_name"]}), axis=1).tolist()
 
     ### 用 features 建立 feature_collection
     feature_collection = FeatureCollection(features=features)
@@ -40,8 +41,8 @@ def dir_csv_to_geojson(src_dir, dst_dir = "./result_dir"):
         dst_path = f"{dst_dir}/{half_name}.geojson"      ### 拼出 dst_path：目的資料夾/檔名.副檔名(geojson)
         csv_to_geojson(src_path=src_path, dst_path=dst_path)  ### 核心要做的事情 讀取來源路徑的csv檔案 轉成 geojson檔案存入 指定的目的路徑
 
-src_dir = "GEOJSON_file/data"
-dst_dir = "GEOJSON_file/result"
+src_dir = "GEOJSON_file/data/have_ship_name"
+dst_dir = "GEOJSON_file/result/have_ship_name"
 dir_csv_to_geojson(src_dir=src_dir, dst_dir=dst_dir)
 
 ### 要注意一下開vscode的地方
