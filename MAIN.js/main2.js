@@ -216,50 +216,39 @@ fetch('GEOJSON_file/result/')
 
         // 給 checkbox 和 下拉式選單select 用的， 檢查 兩者的狀態 做 相對應的事情
         var check_status_of_select_and_checkbox_then_do_things = function () {
-          // 如果 船隻checkbok 打勾了， 以下做 船隻 checkbox 打勾 要做的事情:
-          if (boat_check.checked) {
-            // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 船隻 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
+          
+          // checkbox 打勾 要做的事情:
+          var checked_do_things = function (processLayers) {
+            // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
             if (last_option !== "選擇日期") {
-              map.removeLayer(boatLayers[last_option]);
+              map.removeLayer(processLayers[last_option]);
             }
-            // 顯示現在的boat圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 船隻 checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
-            if (select.value !== "選擇日期"){
+            // 顯示現在的boat圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
+            if (select.value !== "選擇日期") {
               console.log("boat checked select.value", select.value)
-              boatLayers[select.value].addTo(map);
+              processLayers[select.value].addTo(map);
             }
-            
             // 上次的圖層 更新為 現在的圖層，給下次的選項刪除此次的圖層
             last_option = select.value
-          }
-          // 如果 船隻checkbok 沒打勾勾了， 以下做 船隻 checkbox 沒打勾勾了 要做的事情:
-          else {
-            if (last_option !== "選擇日期") {
-              console.log("boat unchecked last_option", last_option);
-              map.removeLayer(boatLayers[last_option]);
-            }
           }
           
-          // 如果 AIS checkbok 打勾了， 以下做 AIS checkbox 打勾 要做的事情:
-          if (ais_check.checked) {
-            // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， 這個沒有圖層不能刪， 所以 AIS checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
+          // checkbox 沒打勾勾了 要做的事情:
+          var unchecked_do_things = function (processLayers) {
+            // 如果 checkbok 沒打勾勾了， 以下做 checkbox 沒打勾勾了 要做的事情:
             if (last_option !== "選擇日期") {
-              map.removeLayer(boatLayers_AIS[last_option]);
-            }
-            // 顯示現在的ais圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 ais checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
-            if( select.value !== "選擇日期"){
-              console.log("ais checked select.value", select.value)
-              boatLayers_AIS[select.value].addTo(map);
-            }
-            // 上次的圖層 更新為 現在的圖層，給下次的選項刪除此次的圖層
-            last_option = select.value
-          }
-          // 如果 AIS checkbok 沒打勾勾了， 以下做 AIS checkbox 沒打勾勾了 要做的事情:
-          else {
-            if (last_option !== "選擇日期") {
-              console.log("AIS unchecked last_option", last_option);
-              map.removeLayer(boatLayers_AIS[last_option]);
+              console.log("boat unchecked last_option", last_option);
+              map.removeLayer(processLayers[last_option]);
             }
           }
+
+
+          // 如果 船隻 checkbok 打勾/沒打勾 要做的事情
+          if (boat_check.checked) {  checked_do_things(boatLayers)}
+          else                    {unchecked_do_things(boatLayers)}
+
+          // 如果 船隻ais checkbok 打勾/沒打勾 要做的事情
+          if (ais_check.checked) {  checked_do_things(boatLayers_AIS)}
+          else                   {unchecked_do_things(boatLayers_AIS)}
         }
 
 
