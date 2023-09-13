@@ -213,9 +213,9 @@ fetch('GEOJSON_file/result/')
         // 紀錄 select 上次按的選項，移除圖層的時候會用到， 因為 boat 和 ais 的日期一定會一樣， 所以不需要 分 boat_last_option 和 ais_last_option
         var last_option = "選擇日期"
 
-
-        var checkfunction_for_select = function () {
-          if (image_check.checked == false && boat_check.checked === false && ais_check.checked === false) {
+        
+        // 給 checkbox 和 下拉式選單select 用的， 檢查 兩者的狀態 做 相對應的事情
+        var check_status_of_select_and_checkbox_then_do_things = function () {
             boat_check.checked = true
           }
           if (boat_check.checked) {
@@ -238,28 +238,44 @@ fetch('GEOJSON_file/result/')
 
         }
 
-        var checkfunction_for_checkbox = function () {
+          // 如果 船隻checkbok 打勾了， 以下做 船隻 checkbox 打勾 要做的事情:
           if (boat_check.checked) {
+            // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 船隻 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
             if (last_option !== "選擇日期") {
-              checkfunction_for_select();
-              console.log("boat checked last_option", last_option);
+              map.removeLayer(boatLayers[last_option]);
             }
+            // 顯示現在的boat圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 船隻 checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
+            if (select.value !== "選擇日期"){
+              console.log("boat checked select.value", select.value)
+              boatLayers[select.value].addTo(map);
+            }
+            
+            // 上次的圖層 更新為 現在的圖層，給下次的選項刪除此次的圖層
+            last_option = select.value
           }
+          // 如果 船隻checkbok 沒打勾勾了， 以下做 船隻 checkbox 沒打勾勾了 要做的事情:
           else {
             if (last_option !== "選擇日期") {
               console.log("boat unchecked last_option", last_option);
               map.removeLayer(boatLayers[last_option]);
             }
           }
-        }
-
-        var checkfunction_for_checkbox_ais = function () {
+          
+          // 如果 AIS checkbok 打勾了， 以下做 AIS checkbox 打勾 要做的事情:
           if (ais_check.checked) {
+            // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， 這個沒有圖層不能刪， 所以 AIS checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
             if (last_option !== "選擇日期") {
-              checkfunction_for_select();
-              console.log("AIS checked last_option", last_option);
+              map.removeLayer(boatLayers_AIS[last_option]);
             }
+            // 顯示現在的ais圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 ais checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
+            if( select.value !== "選擇日期"){
+              console.log("ais checked select.value", select.value)
+              boatLayers_AIS[select.value].addTo(map);
+            }
+            // 上次的圖層 更新為 現在的圖層，給下次的選項刪除此次的圖層
+            last_option = select.value
           }
+          // 如果 AIS checkbok 沒打勾勾了， 以下做 AIS checkbox 沒打勾勾了 要做的事情:
           else {
             if (last_option !== "選擇日期") {
               console.log("AIS unchecked last_option", last_option);
@@ -269,11 +285,10 @@ fetch('GEOJSON_file/result/')
         }
 
 
-
         // 參考 https://stackoverflow.com/questions/64046196/i%C2%B4m-stucked-creating-a-new-leaflet-custom-control
-        L.DomEvent.on(boat_check, 'click', checkfunction_for_checkbox);
-        L.DomEvent.on(ais_check, 'click', checkfunction_for_checkbox_ais);
-        L.DomEvent.on(select, 'change', checkfunction_for_select);
+        L.DomEvent.on(boat_check, 'click' , check_status_of_select_and_checkbox_then_do_things);
+        L.DomEvent.on(ais_check , 'click' , check_status_of_select_and_checkbox_then_do_things);
+        L.DomEvent.on(select    , 'change', check_status_of_select_and_checkbox_then_do_things);
         // L.DomEvent.on(container, 'click', checkfunction);
         // 參考 leaflet官網上下載下來的javascript：https://leafletjs.com/download.html，用 ctrl+f 搜 stopPropagation
         L.DomEvent.on(container, 'mousedown touchstart dblclick contextmenu', L.DomEvent.stopPropagation);
