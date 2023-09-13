@@ -60,25 +60,26 @@ fetch('GEOJSON_file/result/')
     // 過濾出你想要的文件名，例如只獲取以 '.geojson' 结尾的文。件名
     let GeoJSONboatfileNames = GeoJSONboatfileNames_withoutfilter.filter(GEOfileName => GEOfileName.endsWith('.geojson'));
     // console.log("GeoJSONboatfileNames", GeoJSONboatfileNames);
-    console.log(GeoJSONboatfileNames);
+    console.log("GeoJSONboatfileNames", GeoJSONboatfileNames);
     // 創建 管理GEOJSON檔案群集圖層(markerClusterGroup)物件 放入 {}
     var boatLayers = {}
     var boatLayers_AIS = {}
     var dates = []
-    GeoJSONboatfileNames.forEach(function(fileName_fordates) {
-    // 提取日期部分（從位置17到25）
+    GeoJSONboatfileNames.forEach(function (fileName_fordates) {
+      // 提取日期部分（從位置17到25）
 
-    if (fileName_fordates.length>65) {
-    var yearpart = fileName_fordates.substring(17, 21);
-    var monthpart = fileName_fordates.substring(21, 23);
-    var daypart = fileName_fordates.substring(23, 25);
-    const datePart = `${yearpart}-${monthpart}-${daypart}`
+      if (fileName_fordates.length > 65) {
+        var yearpart = fileName_fordates.substring(17, 21);
+        var monthpart = fileName_fordates.substring(21, 23);
+        var daypart = fileName_fordates.substring(23, 25);
+        const datePart = `${yearpart}-${monthpart}-${daypart}`
 
-    // 如果日期不在 dates 數组中，則添加
-    if (!dates.includes(datePart)) {
-        dates.push(datePart);
+        // 如果日期不在 dates 數组中，則添加
+        if (!dates.includes(datePart)) {
+          dates.push(datePart);
+        }
       }
-    }});
+    });
     // 現在 dates 數组包含不重複的日期
     dates.reverse();
     console.log(dates);
@@ -107,7 +108,8 @@ fetch('GEOJSON_file/result/')
 
     ///////////////////////////////////////////////////////////////////////////////
     // 把處理好的資料拿來$.getJSON運作並把產出的點位放到圖層上
-    // 第一個要丟處理好可給$.getJSON讀取的路徑，第二個丟檔案名稱
+    // 再把圖層存到 boat_geoJSON{} 裡面
+    // 第一個參數要丟處理好可給$.getJSON讀取的路徑，第二個參數丟檔案名稱
     function processGeoJSONFile(filePath, fileName) {
       // 使用 $.getJSON 載入並處理 GEOJSON 檔案
       $.getJSON(filePath, function (data) {
@@ -119,7 +121,7 @@ fetch('GEOJSON_file/result/')
           }
         })
         if (fileName.length > 65) {
-          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
+          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);  //fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
         }
         // if (fileName.length){
         //   boat_geoJSON.addTo(boatLayers_AIS[`${.substring(,  )}`]);
@@ -135,12 +137,15 @@ fetch('GEOJSON_file/result/')
         if (file.endsWith('.geojson')) {
           //設定$.getJSON讀取的路徑
           const GeoJSONfilePath = `${relative_path}${file}`;
+          console.log("GeoJSONfilePath", GeoJSONfilePath)
           processGeoJSONFile(GeoJSONfilePath, `${file}`);
         }
       });
     }
 
     // 調用處理文件的函数
+    console.log("GeoJSONboatfileNames", GeoJSONboatfileNames)
+    console.log("GeoJSONboatfilesPath", GeoJSONboatfilesPath)
     processGeoJSONFiles(GeoJSONboatfileNames,GeoJSONboatfilesPath);
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -205,7 +210,7 @@ fetch('GEOJSON_file/result/')
         console.log("select.value", select.value.length)
 
 
-        // 紀錄 select 上次按的選項，移除圖層的時候會用到
+        // 紀錄 select 上次按的選項，移除圖層的時候會用到， 因為 boat 和 ais 的日期一定會一樣， 所以不需要 分 boat_last_option 和 ais_last_option
         var last_option = "選擇日期"
 
 
