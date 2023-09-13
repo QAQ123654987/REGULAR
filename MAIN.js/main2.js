@@ -216,28 +216,6 @@ fetch('GEOJSON_file/result/')
         
         // 給 checkbox 和 下拉式選單select 用的， 檢查 兩者的狀態 做 相對應的事情
         var check_status_of_select_and_checkbox_then_do_things = function () {
-            boat_check.checked = true
-          }
-          if (boat_check.checked) {
-            if (last_option !== "選擇日期") {
-              map.removeLayer(boatLayers[last_option]);
-            }
-            boatLayers[select.value].addTo(map);
-            last_option = select.value
-          }
-
-          if (ais_check.checked) {
-            if (last_option !== "選擇日期") {
-              map.removeLayer(boatLayers_AIS[last_option]);
-            }
-            boatLayers_AIS[select.value].addTo(map);
-            last_option = select.value
-          }
-
-
-
-        }
-
           // 如果 船隻checkbok 打勾了， 以下做 船隻 checkbox 打勾 要做的事情:
           if (boat_check.checked) {
             // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 船隻 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
