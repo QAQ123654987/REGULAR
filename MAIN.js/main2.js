@@ -85,13 +85,13 @@ fetch('GEOJSON_file/result/')
     console.log(dates);
 
     //創建圖層
-    for (var i = 0; i < dates.length; i++){
-      var date =  dates[i]
+    for (var i = 0; i < dates.length; i++) {
+      var date  = dates[i]
       var year  = date.substring(0,  4)
       var month = date.substring(5,  7)
       var day   = date.substring(8, 10)
-      boatLayers[`${year}${month}${day}`] =  L.markerClusterGroup();
-      boatLayers_AIS[`${year}${month}${day}`] =  L.markerClusterGroup();
+      boatLayers    [`${year}${month}${day}`] = L.markerClusterGroup();
+      boatLayers_AIS[`${year}${month}${day}`] = L.markerClusterGroup();
 
     }
 
