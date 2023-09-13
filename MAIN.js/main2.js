@@ -1,7 +1,7 @@
-var map = L.map('map',{center:[23.973, 120.979], zoom: 8});
+var map = L.map('map', { center: [23.973, 120.979], zoom: 8 });
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 var attribution = '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-var bigmap = L.tileLayer(osmUrl,{attribution: attribution}).addTo(map);
+var bigmap = L.tileLayer(osmUrl, { attribution: attribution }).addTo(map);
 
 //創建迷你視窗
 var miniosm = new L.tileLayer(osmUrl);
@@ -22,12 +22,12 @@ var option = {
 };
 var drawControl = new L.Control.Draw(option);
 map.addControl(drawControl);
-    
-// ###################################################################################################
-    
 
 // ###################################################################################################
-        
+
+
+// ###################################################################################################
+
 //設定抓取文件路徑
 const GeoJSONboatfilesPath = 'GEOJSON_file/result/';
 const GeoJSONboatfilesAISPath = 'GEOJSON_file/result/have_ship_name/';
@@ -146,7 +146,7 @@ fetch('GEOJSON_file/result/')
     // 調用處理文件的函数
     console.log("GeoJSONboatfileNames", GeoJSONboatfileNames)
     console.log("GeoJSONboatfilesPath", GeoJSONboatfilesPath)
-    processGeoJSONFiles(GeoJSONboatfileNames,GeoJSONboatfilesPath);
+    processGeoJSONFiles(GeoJSONboatfileNames, GeoJSONboatfilesPath);
 
     ///////////////////////////////////////////////////////////////////////////////
 
@@ -213,7 +213,7 @@ fetch('GEOJSON_file/result/')
         // 紀錄 select 上次按的選項，移除圖層的時候會用到， 因為 boat 和 ais 的日期一定會一樣， 所以不需要 分 boat_last_option 和 ais_last_option
         var last_option = "選擇日期"
 
-        
+
         // 給 checkbox 和 下拉式選單select 用的， 檢查 兩者的狀態 做 相對應的事情
         var check_status_of_select_and_checkbox_then_do_things = function () {
           // 如果 船隻checkbok 打勾了， 以下做 船隻 checkbox 打勾 要做的事情:
