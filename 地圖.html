@@ -3,49 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>圖台</title>
+    <!-- leaflet -->
     <link rel="stylesheet" href="leaflet/css/leaflet.css">
     <script src="leaflet/js/leaflet.js"></script>
-    <script src="leaflet/js/leaflet-src.esm.js"></script>
-    <script src="leaflet/js/leaflet-src.js"></script>
+    <!-- jquery -->
     <script src="jquery/jquery-3.7.0.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <style>
-        body{
+    <!-- jqueryui -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <!-- 畫圖小工具 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+    <!-- 群聚小工具 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.0.5/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.0.5/dist/MarkerCluster.Default.css"/>
+    <script src="https://unpkg.com/leaflet.markercluster@1.0.5/dist/leaflet.markercluster.js"></script>
+    <!--  -->
+    <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+    <!-- 字體 -->
+    <link rel="stylesheet" href="MAIN.css/font.css">   
+    <link rel="stylesheet" href="MAIN.css/main.css">
+    <link rel="stylesheet" href="fontawesome/css/all.css">
+    <!-- 創建按鈕小工具 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css"/> 
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <!-- 迷你地圖小工具 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
+    <!-- 滑軸小工具 -->
+    <script src="https://cdn.jsdelivr.net/gh/Falke-Design/LeafletSlider@latest/dist/leaflet.SliderControl.min.js"></script>
+    
+    
 
-            margin: 0;
-            padding: 0;
-        }
-                 #headtitle {
-            font-size: 28px;
-            text-align: center;
-                     padding: 10px;  }
-            #map {
-            width: 100%;
-            height: calc(100vh - 58px); /* 計算剩餘視窗高度，扣掉 #headtitle 的高度 */
-        }
 
+      <style>
+      #radius-control {
+        margin: 10px;
+      }
+  
+      #cluster-radius-slider {
+        width: 100%;
+      }
     </style>
+
+
 </head>     
 <body>
-    <div id="headtitle">建構SAR衛星多時序與近即時海岸帶整合監測平台</div>
+        <div id="radius-control">
+        <input type="range" id="cluster-radius-slider" min="10" max="200" value="50">
+        <span id="radius-value">50</span>
+      </div>
+    <div id="headtitle">SAR衛星多時序與近即時海岸帶整合監測平台</div>
     <div id="map" style="width: 100%;"></div>
-    
-    <script>
+    <script src="MAIN.js/main2.js"></script>
 
-        var map = L.map('map',{center:[23.973, 120.979], zoom: 8});   
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom: 14,attribution: '© OpenStreetMap'}).addTo(map);
-  var drawItem = new L.FeatureGroup();
-        map.addLayer(drawItem);
-                var option = {
-            position: 'topleft',
-            collapsed: true,
-            edit: {
-                featureGroup: drawItem,
-            },
-        };
-        var drawControl = new L.Control.Draw(option);
-        map.addControl(drawControl);
-    </script>
+
+    
+</script>
+
 </body>
 </html>
