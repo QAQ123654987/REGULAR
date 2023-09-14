@@ -5,20 +5,115 @@ from geojson import Feature, FeatureCollection, Point
 
 import os
 
-### 核心要做的事情 讀取來源路徑的csv檔案 轉成 geojson檔案存入 指定的目的路徑
+import numpy as np
+
+def check_csv_have_header_and_do_things(src_path):
+    '''
+    檢查 src_path 指定的CSV 有沒有 header 和 代表 longitude 與 latitude 的文字
+        沒有 的話: 幫他補齊header(已詢問第一行為"Y", 第二行為"X")
+        有   的話: 檢查 header 第一欄 是不是空的, 是空的用 "INDEX"文字 補齊
+
+    return
+        datas, longitude_name, latitude_name
+    '''
+    datas = pandas.read_csv(src_path)  ### 讀取CSV， 不管有沒有header
+    headers = datas.columns            ### 把 header 抓出來等等檢查
+    have_header_flag = False           ### 用來標記 目前的CSV 有沒有header, 預設用False, 檢查的過程中有發現header 就設True
+    longitude_name = ""                ### 用來記住 header 中 哪個欄位 紀錄 經度(x, longitude)
+    latitude_name = ""                 ### 用來記住 header 中 哪個欄位 紀錄 緯度(y, latitude)
+
+    ### 掃過 目前所有 headers, 只要裡面存在 x, y, lon開頭, lat開頭 的 header, 我們就算這個CSV 有header存在
+    ### 如果有 header 存在, 順便紀錄 longitude_name 和 longitude_name 分別是用哪些文字表達, 舉例 longitude_name 可能就有 "LON", "Lon", "Longitude", "LONGTITUDE", ... 之類的
+    for header in headers:
+        if( ("lon" in header[:3].lower()) or
+            ("lat" in header[:3].lower()) or
+            ("x"   in header    .lower() and len(header) == 1) or
+            ("y"   in header    .lower() and len(header) == 1) ):
+            have_header_flag = True
+
+        if  ( ("lon" in header[:3].lower()) or
+              ("x"   in header    .lower() and len(header) == 1)):
+            longitude_name = header
+
+        elif( ("lat" in header[:3].lower()) or
+              ("y"   in header    .lower() and len(header) == 1)):
+            latitude_name  = header
+
+    ### 走到這裡, 如果 have_header_flag 被設成 True 代表此CSV有 header
+    if(have_header_flag is True):
+        if(datas.columns[0] == "Unnamed: 0"):
+            datas.columns = ["INDEX"] + list(datas.columns[1:])
+        return datas, longitude_name, latitude_name
+
+    ### 走到這裡, 如果 have_header_flag 仍為False, 代表沒機會被設成 True, 代表此CSV 沒有 header
+    else:
+        ### header 抓成待處理的數值, 要把數值抓出來放入待處理的資料堆裡 並把 header放上正確的文字
+        ### 已詢問目前的狀況沒有header就一定是兩行, 第一行是"Y", 第二行是"X", 具體做的事情如下:
+        ###     step1.header數值抓出來,
+        ###     step2.替換成正確的header
+        ###     step3.抓出來的數值append進datas
+        first_row = {"Y": float(datas.columns[0]), "X": float(datas.columns[1])}  ### 先把 dataframe 的 header 數字 抓出來
+        datas.columns  = ["Y", "X"]                                               ### 再把 dataframe 的 header 替換成 想要的的文字
+        datas = datas.append(first_row, ignore_index=True)                        ### 把 header抓出來的數字 append 進去 datas
+        # print(datas)  ### 看一下結果對不對
+
+        latitude_name  = "Y"
+        longitude_name = "X"
+        return datas, longitude_name, latitude_name
+
 def csv_to_geojson(src_path, dst_path):
-    ### 用 panda讀取 CSV
-    datas = pandas.read_csv(src_path)
+    datas, longitude_name, latitude_name = check_csv_have_header_and_do_things(src_path)
+    datas = datas.replace(np.nan, None)  ### 把 nan 填 None
 
-    ### 用 Pint() 建立 一堆feature() 存進 features
-    features = datas.apply(
-        lambda row: Feature(geometry   = Point( ( float(row['X']), float(row['Y']) ) ),
-                            properties = {"id": row["id"], "ship_name": row["ship_name"]}), axis=1).tolist()
+    features = []
+    for index, row in datas.iterrows():
+        ### 建立 Point()物件
+        x = row[longitude_name]
+        y = row[latitude_name]
+        point = Point((x, y))
 
-    ### 用 features 建立 feature_collection
+        ### 建立 properties字典
+        properties = {}
+        for header in datas.columns:
+            if(header != latitude_name and header != longitude_name):  ### 如果 遇到 longitude 和 latitude 欄位 
+                properties[header] = row[header]
+
+        ### 建立 Feature物件, 第一個geometry參數 放 Point()物件, 第二個properties參數 放 properties字典
+        feature = Feature(
+            geometry = point,
+            properties = properties
+        )
+
+        ### 建立好的 Feature物件 放入 features list 裡面
+        features.append(feature)
+
+    ### 孫弘 問 chatgpt的版本
+    # for index, row in datas.iterrows():
+    #     x = float(row.iloc[5]) if not pandas.isna(row.iloc[5]) else None
+    #     y = float(row.iloc[4]) if not pandas.isna(row.iloc[4]) else None
+    #     NUM_value = int(row.iloc[0]) if not pandas.isna(row.iloc[0]) else None
+    #     MMSI_value = int(row.iloc[1]) if not pandas.isna(row.iloc[1]) else None
+    #     IMO_value = int(row.iloc[2]) if not pandas.isna(row.iloc[2]) else None
+    #     SHIP_ID_value = int(row.iloc[3]) if not pandas.isna(row.iloc[3]) else None
+    #     SPEED_value = int(row.iloc[6]) if not pandas.isna(row.iloc[6]) else None
+    #     HEADING_value = int(row.iloc[7]) if not pandas.isna(row.iloc[7]) else None
+    #     COURSE_value = int(row.iloc[8]) if not pandas.isna(row.iloc[8]) else None
+    #     STATUS_value = int(row.iloc[9]) if not pandas.isna(row.iloc[9]) else None
+    #     TIMESTAMP_value = row.iloc[10] if not pandas.isna(row.iloc[10]) else None
+    #     DSRC_value = row.iloc[11] if not pandas.isna(row.iloc[11]) else None
+    #     UTC_SECONDS_value = int(row.iloc[12]) if not pandas.isna(row.iloc[12]) else None
+
+    #     feature = Feature(
+    #         geometry = Point((x, y)),
+    #         properties = {"NUM": NUM_value, "MMSI": MMSI_value, "IMO": IMO_value, "SHIP_ID": SHIP_ID_value, "SPEED": SPEED_value, 
+    #                     "HEADING": HEADING_value, "COURSE": COURSE_value, "STATUS": STATUS_value, "TIMESTAMP": TIMESTAMP_value, 
+    #                     "DSRC": DSRC_value, "UTC_SECONDS": UTC_SECONDS_value, }
+    #     )
+
+    ### 用 features list 建立 FeatureCollection() 物件
     feature_collection = FeatureCollection(features=features)
 
-    ### 寫入檔案
+    ### 用 geojson物件 的 .dump() 成員函數 把 feature_collection 寫成文字檔
     with open(dst_path, 'w', encoding='utf-8') as f:
         geojson.dump(feature_collection, f)
 
