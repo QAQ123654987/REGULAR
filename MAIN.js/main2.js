@@ -65,9 +65,8 @@ fetch('GEOJSON_file/result/')
     var boatLayers = {}
     var boatLayers_AIS = {}
     var dates = []
-    GeoJSONboatfileNames.forEach(function (fileName_fordates) {
-      // 提取日期部分（從位置17到25）
-
+    GeoJSONboatfileNames.forEach( function (fileName_fordates) {
+      // 提取日期部分（從位置17到25）, fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
       if (fileName_fordates.length > 65) {
         var yearpart = fileName_fordates.substring(17, 21);
         var monthpart = fileName_fordates.substring(21, 23);
@@ -107,7 +106,7 @@ fetch('GEOJSON_file/result/')
     });
 
     ///////////////////////////////////////////////////////////////////////////////
-    // 把處理好的資料拿來$.getJSON運作並把產出的點位放到圖層上
+    // 把處理好的資料用 jQuery 的 $.getJSON 函數運作並 把產出的點位 根據日期 放到圖層上
     // 再把圖層存到 boat_geoJSON{} 裡面
     // 第一個參數要丟處理好可給$.getJSON讀取的路徑，第二個參數丟檔案名稱
     function processGeoJSONFile(filePath, fileName) {
@@ -116,12 +115,14 @@ fetch('GEOJSON_file/result/')
         var boat_geoJSON = L.geoJSON(data, {
           pointToLayer: function (feature, latlng) {
             // 使用自定義圖標創建標記
-            var temp_mark = L.marker(latlng, { icon: customIcon }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
-            return temp_mark;
-          }
-        })
+              var temp_mark = L.marker(latlng, { icon: customIcon }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
+              return temp_mark;
+            }
+          })
+
+        //fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
         if (fileName.length > 65) {
-          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);  //fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
+          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
         }
         // if (fileName.length){
         //   boat_geoJSON.addTo(boatLayers_AIS[`${.substring(,  )}`]);
@@ -147,8 +148,9 @@ fetch('GEOJSON_file/result/')
     console.log("GeoJSONboatfileNames", GeoJSONboatfileNames)
     console.log("GeoJSONboatfilesPath", GeoJSONboatfilesPath)
     processGeoJSONFiles(GeoJSONboatfileNames, GeoJSONboatfilesPath);
-
-    ///////////////////////////////////////////////////////////////////////////////
+    
+    // 走到這裡 會把 boatLayers, boatLayers_AIS 的 Cluster圖層物件 都依據 日期 把 資料點 放入 相應日期的Cluster圖層物件中 囉～
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //創建按鈕
     L.Control.KongButtons = L.Control.extend({
@@ -276,7 +278,7 @@ fetch('GEOJSON_file/result/')
     // ###################################################################################################
 
   })
- 
+
 //回到地圖中央
 var zoom_to_taiwan = L.easyButton({
   states: [
