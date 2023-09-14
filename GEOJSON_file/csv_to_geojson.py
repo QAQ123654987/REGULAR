@@ -9,8 +9,8 @@ import numpy as np
 
 def check_csv_have_header_and_do_things(src_path):
     '''
-    檢查 src_path 指定的CSV 有沒有 header 和 代表 longitude 與 latitude 的文字
-        沒有 的話: 幫他補齊header(已詢問第一行為"Y", 第二行為"X")
+    檢查 src_path 指定的CSV 有沒有 header 與 代表 longitude 與 latitude 的文字是什麼
+        沒有 的話: 幫他補齊header(已詢問第一行為"Y", 第二行為"X"), 並指定 longitude的文字為 "X", latitude的文字為 "Y"
         有   的話: 檢查 header 第一欄 是不是空的, 是空的用 "INDEX"文字 補齊
 
     return
