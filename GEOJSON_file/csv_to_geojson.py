@@ -67,17 +67,41 @@ def csv_to_geojson(src_path, dst_path):
 
     features = []
     for index, row in datas.iterrows():
+        #################################################################################################################
         ### 建立 Point()物件
         x = row[longitude_name]
         y = row[latitude_name]
         point = Point((x, y))
 
+        # 相當於問chatgpt的這些部分
+        #     x = float(row.iloc[5]) if not pandas.isna(row.iloc[5]) else None
+        #     y = float(row.iloc[4]) if not pandas.isna(row.iloc[4]) else None
+        #     geometry = Point((x, y)),
+
+        #################################################################################################################
         ### 建立 properties字典
         properties = {}
         for header in datas.columns:
             if(header != latitude_name and header != longitude_name):  ### 如果 遇到 longitude 和 latitude 欄位 
                 properties[header] = row[header]
 
+        # 相當於問chatgpt的這些部分
+        #     NUM_value = int(row.iloc[0]) if not pandas.isna(row.iloc[0]) else None
+        #     MMSI_value = int(row.iloc[1]) if not pandas.isna(row.iloc[1]) else None
+        #     IMO_value = int(row.iloc[2]) if not pandas.isna(row.iloc[2]) else None
+        #     SHIP_ID_value = int(row.iloc[3]) if not pandas.isna(row.iloc[3]) else None
+        #     SPEED_value = int(row.iloc[6]) if not pandas.isna(row.iloc[6]) else None
+        #     HEADING_value = int(row.iloc[7]) if not pandas.isna(row.iloc[7]) else None
+        #     COURSE_value = int(row.iloc[8]) if not pandas.isna(row.iloc[8]) else None
+        #     STATUS_value = int(row.iloc[9]) if not pandas.isna(row.iloc[9]) else None
+        #     TIMESTAMP_value = row.iloc[10] if not pandas.isna(row.iloc[10]) else None
+        #     DSRC_value = row.iloc[11] if not pandas.isna(row.iloc[11]) else None
+        #     UTC_SECONDS_value = int(row.iloc[12]) if not pandas.isna(row.iloc[12]) else None
+        #     properties = {"NUM": NUM_value, "MMSI": MMSI_value, "IMO": IMO_value, "SHIP_ID": SHIP_ID_value, "SPEED": SPEED_value, 
+        #                     "HEADING": HEADING_value, "COURSE": COURSE_value, "STATUS": STATUS_value, "TIMESTAMP": TIMESTAMP_value, 
+        #                     "DSRC": DSRC_value, "UTC_SECONDS": UTC_SECONDS_value, }
+
+        #################################################################################################################
         ### 建立 Feature物件, 第一個geometry參數 放 Point()物件, 第二個properties參數 放 properties字典
         feature = Feature(
             geometry = point,
