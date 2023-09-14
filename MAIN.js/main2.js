@@ -151,6 +151,20 @@ fetch('GEOJSON_file/result/')
     
     // 走到這裡 會把 boatLayers, boatLayers_AIS 的 Cluster圖層物件 都依據 日期 把 資料點 放入 相應日期的Cluster圖層物件中 囉～
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //  一些 KongButtons 和 slider 會共用到的一些 變數 和 function 都拉到最上面
+    let last_option = "選擇日期";                // 紀錄 select 上次按的選項，移除圖層的時候會用到， 因為 boat 和 ais 的日期一定會一樣， 所以不需要 分 boat_last_option 和 ais_last_option
+    let shared_maxClusterRadius = 80;           // 給所有Layer 共用的 cluster群聚半徑
+    
+    let update_cluster_layer = function (processedLayer) {
+      temp = L.markerClusterGroup();                            // 建立一個 新的暫存Cluster
+      temp.addLayer(processedLayer);                            // 把 現在的Cluster資料 加進去 暫存Cluster
+      temp.options.maxClusterRadius = shared_maxClusterRadius;  // 設定 暫存Cluster 的 Cluster半徑
+      map.removeLayer(processedLayer);                          // 把 原本的Cluster 從地圖上拿掉
+      temp.addTo(map);                                          // 把 暫存的Cluster 放上地圖
+      return temp;                                              // 把原本Cluster 更新成 暫存Cluster
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     //創建按鈕
     L.Control.KongButtons = L.Control.extend({
@@ -212,45 +226,60 @@ fetch('GEOJSON_file/result/')
         console.log("select.value", select.value.length)
 
 
-        // 紀錄 select 上次按的選項，移除圖層的時候會用到， 因為 boat 和 ais 的日期一定會一樣， 所以不需要 分 boat_last_option 和 ais_last_option
-        var last_option = "選擇日期"
-
-
         // 給 checkbox 和 下拉式選單select 用的， 檢查 兩者的狀態 做 相對應的事情
         var check_status_of_select_and_checkbox_then_do_things = function () {
+          console.log("check_status_of_select_and_checkbox_then_do_things~~~~~");
           
           // checkbox 打勾 要做的事情:
-          var checked_do_things = function (processLayers) {
+          var checked_do_things = function (processedLayers) {
             // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
+            console.log("checked_do_things~~~~~");
+            console.log("last_option", last_option);
+            console.log("select.value", select.value);
             if (last_option !== "選擇日期") {
-              map.removeLayer(processLayers[last_option]);
+              console.log("remove last option:", last_option);
+              map.removeLayer(processedLayers[last_option]);
             }
+
             // 顯示現在的boat圖層， 也是有可能選到 "選擇日期"， "選擇日期"沒有圖層不能加， 所以 checkbox 打勾時 如果 select.value 遇到 "選擇日期" 要跳過
             if (select.value !== "選擇日期") {
-              console.log("boat checked select.value", select.value)
-              processLayers[select.value].addTo(map);
+              console.log("add select.value to map:", select.value);
+              processedLayers[select.value].addTo(map);
+              
+              console.log("update select.value cluster:", select.value);
+              processedLayers[select.value] = update_cluster_layer(processedLayer = processedLayers[select.value]);
             }
+
             // 上次的圖層 更新為 現在的圖層，給下次的選項刪除此次的圖層
-            last_option = select.value
+            last_option = select.value;
+
+            // 因為 javascript 是 call by sharing, 我在過程中又有 把processedLayers的內容 賦予新的物件 且 我想保存這個操作, 所以就把操作結果return 回去讓外面接這樣子囉～
+            return processedLayers
           }
           
           // checkbox 沒打勾勾了 要做的事情:
-          var unchecked_do_things = function (processLayers) {
+          var unchecked_do_things = function (processedLayers) {
+            console.log("unchecked_do_things~~~~~");
+            console.log("last_option", last_option);
+            console.log("select.value", select.value);
             // 如果 checkbok 沒打勾勾了， 以下做 checkbox 沒打勾勾了 要做的事情:
             if (last_option !== "選擇日期") {
-              console.log("boat unchecked last_option", last_option);
-              map.removeLayer(processLayers[last_option]);
+              console.log("unchecked last_option", last_option);
+              map.removeLayer(processedLayers[last_option]);
             }
+            
+            // 因為 javascript 是 call by sharing, 我在過程中又有 把processedLayers的內容 賦予新的物件 且 我想保存這個操作, 所以就把操作結果return 回去讓外面接這樣子囉～
+            return processedLayers
           }
 
 
           // 如果 船隻 checkbok 打勾/沒打勾 要做的事情
-          if (boat_check.checked) {  checked_do_things(boatLayers)}
-          else                    {unchecked_do_things(boatLayers)}
+          if (boat_check.checked) { boatLayers =   checked_do_things(processedLayers = boatLayers)}
+          else                    { boatLayers = unchecked_do_things(processedLayers = boatLayers)}
 
           // 如果 船隻ais checkbok 打勾/沒打勾 要做的事情
-          if (ais_check.checked) {  checked_do_things(boatLayers_AIS)}
-          else                   {unchecked_do_things(boatLayers_AIS)}
+          if (ais_check.checked) { boatLayers_AIS =   checked_do_things(processedLayers = boatLayers_AIS)}
+          else                   { boatLayers_AIS = unchecked_do_things(processedLayers = boatLayers_AIS)}
         }
 
 
@@ -262,7 +291,6 @@ fetch('GEOJSON_file/result/')
         // 參考 leaflet官網上下載下來的javascript：https://leafletjs.com/download.html，用 ctrl+f 搜 stopPropagation
         L.DomEvent.on(container, 'mousedown touchstart dblclick contextmenu', L.DomEvent.stopPropagation);
         L.DomEvent.on(container, 'wheel', L.DomEvent.stopPropagation);
-
 
         return container;
       },
