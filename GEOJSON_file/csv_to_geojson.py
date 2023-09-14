@@ -9,8 +9,8 @@ import numpy as np
 
 def check_csv_have_header_and_do_things(src_path):
     '''
-    檢查 src_path 指定的CSV 有沒有 header 和 代表 longitude 與 latitude 的文字
-        沒有 的話: 幫他補齊header(已詢問第一行為"Y", 第二行為"X")
+    檢查 src_path 指定的CSV 有沒有 header 與 代表 longitude 與 latitude 的文字是什麼
+        沒有 的話: 幫他補齊header(已詢問第一行為"Y", 第二行為"X"), 並指定 longitude的文字為 "X", latitude的文字為 "Y"
         有   的話: 檢查 header 第一欄 是不是空的, 是空的用 "INDEX"文字 補齊
 
     return
@@ -67,17 +67,41 @@ def csv_to_geojson(src_path, dst_path):
 
     features = []
     for index, row in datas.iterrows():
+        #################################################################################################################
         ### 建立 Point()物件
         x = row[longitude_name]
         y = row[latitude_name]
         point = Point((x, y))
 
+        # 相當於問chatgpt的這些部分
+        #     x = float(row.iloc[5]) if not pandas.isna(row.iloc[5]) else None
+        #     y = float(row.iloc[4]) if not pandas.isna(row.iloc[4]) else None
+        #     geometry = Point((x, y)),
+
+        #################################################################################################################
         ### 建立 properties字典
         properties = {}
         for header in datas.columns:
-            if(header != latitude_name and header != longitude_name):  ### 如果 遇到 longitude 和 latitude 欄位 
+            if(header != latitude_name and header != longitude_name):  ### 如果 遇到 longitude 和 latitude 欄位 要跳過, 因為這兩個是 x, y 應該要存在Point()部分, 不應該存在 properties
                 properties[header] = row[header]
 
+        # 相當於問chatgpt的這些部分
+        #     NUM_value = int(row.iloc[0]) if not pandas.isna(row.iloc[0]) else None
+        #     MMSI_value = int(row.iloc[1]) if not pandas.isna(row.iloc[1]) else None
+        #     IMO_value = int(row.iloc[2]) if not pandas.isna(row.iloc[2]) else None
+        #     SHIP_ID_value = int(row.iloc[3]) if not pandas.isna(row.iloc[3]) else None
+        #     SPEED_value = int(row.iloc[6]) if not pandas.isna(row.iloc[6]) else None
+        #     HEADING_value = int(row.iloc[7]) if not pandas.isna(row.iloc[7]) else None
+        #     COURSE_value = int(row.iloc[8]) if not pandas.isna(row.iloc[8]) else None
+        #     STATUS_value = int(row.iloc[9]) if not pandas.isna(row.iloc[9]) else None
+        #     TIMESTAMP_value = row.iloc[10] if not pandas.isna(row.iloc[10]) else None
+        #     DSRC_value = row.iloc[11] if not pandas.isna(row.iloc[11]) else None
+        #     UTC_SECONDS_value = int(row.iloc[12]) if not pandas.isna(row.iloc[12]) else None
+        #     properties = {"NUM": NUM_value, "MMSI": MMSI_value, "IMO": IMO_value, "SHIP_ID": SHIP_ID_value, "SPEED": SPEED_value, 
+        #                     "HEADING": HEADING_value, "COURSE": COURSE_value, "STATUS": STATUS_value, "TIMESTAMP": TIMESTAMP_value, 
+        #                     "DSRC": DSRC_value, "UTC_SECONDS": UTC_SECONDS_value, }
+
+        #################################################################################################################
         ### 建立 Feature物件, 第一個geometry參數 放 Point()物件, 第二個properties參數 放 properties字典
         feature = Feature(
             geometry = point,
