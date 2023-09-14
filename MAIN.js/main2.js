@@ -301,8 +301,31 @@ fetch('GEOJSON_file/result/')
     control3.addTo(map);
 
     // ###################################################################################################
+    // slider小工具, 用來控制 Cluster的群聚半徑
+    L.control.slider(
+      // slider 第一個參數放 function， 此function 在 slider 改變值後會被執行， 且 此function 規定一定會被丟一個參數放slider的數值(這個參數可以自己命名)
+      function (slider_value) {
+        shared_maxClusterRadius = slider_value;
 
-
+        // 對這邊來說 last_option 是 目前的 select 選項中的選項喔～
+        // 如果 目前的選項 不是 "選擇日期"， 那就 
+        if (last_option !== "選擇日期") {
+          boatLayers    [last_option] = update_cluster_layer(boatLayers    [last_option]);
+          boatLayers_AIS[last_option] = update_cluster_layer(boatLayers_AIS[last_option]);
+        }
+      },
+ 
+      // slider 第二個參數放 slider 的 options, 參數可參考 https://github.com/Eclipse1979/leaflet-slider
+      { 
+        max: 1000,  // slider最大值
+        value: 80,  // slider初始值
+        step: 1,    // slider移動一格的值
+        size: '250px',
+        orientation: 'horizontal',
+        id: 'slider',
+        logo: "C",
+        syncSlider: false  // 滑動的過程中 要不要同步改變值
+      }).addTo(map);
     // ###################################################################################################
 
   })
