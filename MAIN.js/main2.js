@@ -295,11 +295,11 @@ fetch('GEOJSON_file/result/')
         return container;
       },
       onRemove: function (map) { },
-
+      
     });
     var control3 = new L.Control.KongButtons()
     control3.addTo(map);
-
+    
     // ###################################################################################################
     // slider小工具, 用來控制 Cluster的群聚半徑
     L.control.slider(
