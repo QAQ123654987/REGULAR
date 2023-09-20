@@ -110,6 +110,7 @@ fetch('GEOJSON_file/result/')
     // 再把圖層存到 boat_geoJSON{} 裡面
     // 第一個參數要丟處理好可給$.getJSON讀取的路徑，第二個參數丟檔案名稱
     function processGeoJSONFile(filePath, fileName) {
+      if (fileName.length > 65){
       // 使用 $.getJSON 載入並處理 GEOJSON 檔案
       $.getJSON(filePath, function (data) {
         var boat_geoJSON = L.geoJSON(data, {
@@ -119,16 +120,25 @@ fetch('GEOJSON_file/result/')
               return temp_mark;
             }
           })
-
-        //fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
-        if (fileName.length > 65) {
-          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
-        }
-        // if (fileName.length){
-        //   boat_geoJSON.addTo(boatLayers_AIS[`${.substring(,  )}`]);
-        // }
+        boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
       });
+      }
+      else {
+        // 使用 $.getJSON 載入並處理 GEOJSON 檔案
+        $.getJSON(filePath, function (data) {
+          var boat_geoJSON = L.geoJSON(data, {
+            pointToLayer: function (feature, latlng) {
+              // 使用自定義圖標創建標記
+                var temp_mark = L.marker(latlng, { icon: customIcon2 }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
+                return temp_mark;
+              }
+            })
+            // 下面等檔名確定之後再訂
+            boat_geoJSON.addTo(boatLayers_AIS[`${.substring(,  )}`]);
+          });
+        }
     }
+
 
     // 把數組內容做成可給GEOJSON插件運作的樣式，並拿去"函式GeoJSONboatfilesPath"執行。
     // 第一個要丟內容為.geojson檔名的數組，第二個要丟資料夾相對路徑

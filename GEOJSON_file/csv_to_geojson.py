@@ -6,6 +6,9 @@ from geojson import Feature, FeatureCollection, Point
 import os
 
 import numpy as np
+import time
+import keyboard
+import threading
 
 def check_csv_have_header_and_do_things(src_path):
     '''
@@ -36,7 +39,7 @@ def check_csv_have_header_and_do_things(src_path):
             longitude_name = header
 
         elif( ("lat" in header[:3].lower()) or
-              ("y"   in header    .lower() and len(header) == 1)):
+            ("y"   in header    .lower() and len(header) == 1)):
             latitude_name  = header
 
     ### 走到這裡, 如果 have_header_flag 被設成 True 代表此CSV有 header
@@ -162,7 +165,30 @@ def dir_csv_to_geojson(src_dir, dst_dir = "./result_dir"):
 
 src_dir = "GEOJSON_file/data/have_ship_name"
 dst_dir = "GEOJSON_file/result/have_ship_name"
-dir_csv_to_geojson(src_dir=src_dir, dst_dir=dst_dir)
 
-### 要注意一下開vscode的地方
-### 我先看一下你的專案有沒有怪怪的地方嗎還是要先弄你剛剛說的東西可以看一夏，雖然我不知道有沒有問題
+#自動執行
+def execute_dir_csv_to_geojson():
+    global stop_flag
+    global pause_flag
+    stop_flag = False
+    pause_flag = False 
+    while not stop_flag:
+        while not pause_flag:
+            dir_csv_to_geojson(src_dir=src_dir, dst_dir=dst_dir)
+
+geojson_thread = threading.Thread(target=execute_dir_csv_to_geojson)
+geojson_thread.start()
+
+while True:
+    if keyboard.is_pressed("p"):
+        if pause_flag:
+            pause_flag = False
+            print("繼續運行，按下 'P' 鍵暫停")
+        else:
+            pause_flag = True
+            print("暫停運行，按下 'P' 鍵繼續")
+    if keyboard.is_pressed("s"):
+        stop_flag = True
+        print("停止運行")
+        break
+    time.sleep(0.1)
