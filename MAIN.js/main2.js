@@ -31,9 +31,13 @@ map.addControl(drawControl);
 //設定抓取文件路徑
 const GeoJSONboatfilesPath = 'GEOJSON_file/result/';
 const GeoJSONboatfilesAISPath = 'GEOJSON_file/result/have_ship_name/';
+var GeoJSONboatfileNames = []
+
 fetch('GEOJSON_file/result/')
-  .then(response => response.text())
-  .then(data => {
+  .then(function(response) {
+    return response.text();
+})
+  .then(function (data) {
     //console.log("data", data);
     // 用 DOMParser 來解析 fetch到的 HTML， 變成 可操作的物件
     const parser = new DOMParser();
@@ -58,13 +62,19 @@ fetch('GEOJSON_file/result/')
     // console.log("GeoJSONboatfileNames_withoutfilter", GeoJSONboatfileNames_withoutfilter);
 
     // 過濾出你想要的文件名，例如只獲取以 '.geojson' 结尾的文。件名
-    let GeoJSONboatfileNames = GeoJSONboatfileNames_withoutfilter.filter(GEOfileName => GEOfileName.endsWith('.geojson'));
-    // console.log("GeoJSONboatfileNames", GeoJSONboatfileNames);
+    let GeoJSONboatfileNames_to_do = GeoJSONboatfileNames_withoutfilter.filter(GEOfileName => GEOfileName.endsWith('.geojson'));
+
+    GeoJSONboatfileNames_to_do.forEach(function(GeoJSONboatfileName_to_do) {
+      GeoJSONboatfileNames.push(GeoJSONboatfileName_to_do)
+  });
+  })
     console.log("GeoJSONboatfileNames", GeoJSONboatfileNames);
+
     // 創建 管理GEOJSON檔案群集圖層(markerClusterGroup)物件 放入 {}
     var boatLayers = {}
     var boatLayers_AIS = {}
     var dates = []
+    console.log(GeoJSONboatfileNames)
     GeoJSONboatfileNames.forEach( function (fileName_fordates) {
       // 提取日期部分（從位置17到25）, fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
       if (fileName_fordates.length > 65) {
@@ -328,7 +338,8 @@ fetch('GEOJSON_file/result/')
       }).addTo(map);
     // ###################################################################################################
 
-  })
+  
+
 
 //回到地圖中央
 var zoom_to_taiwan = L.easyButton({
@@ -365,38 +376,3 @@ latlng.addTo(map);
 map.on('mousemove', function (e) {
   latlng.update(e.latlng);
 });
-
-// //時間軸
-// // 創建 TimeDimension 控制器
-// var dateDimension = new L.TimeDimension({
-//   times: [],
-// });
-// for (var i = 0; i < dates.length; i++){
-//   var date =  dates[i]
-//   var year  = date.substring(0,  4)
-//   var month = date.substring(5,  7)
-//   var day   = date.substring(8, 10)
-//   dateDimension.times.push(`${year}${month}${day}`);
-//   }
-//   dateDimension.times.reverse();
-//   map.dateDimension = dateDimension;
-
-//   // 創建時間軸控制器
-// var dateDimensionControl = new L.Control.TimeDimension({
-//   timeDimension: dateDimension, // 使用您创建的 datecontrol 时间轴
-//   playerOptions: {
-//       loop: false, // 设置时间轴是否循环播放
-//   },
-// });
-// dateDimensionControl.addTo(map);
-
-// //把圖層和時間軸做上連結
-// for (var i = 0; i < dates.length; i++){
-//   var date =  dates[i]
-//   var year  = date.substring(0,  4)
-//   var month = date.substring(5,  7)
-//   var day   = date.substring(8, 10)
-//   dateDimension.addLayer(boatLayers[`${year}${month}${day}`], {
-//     time:`${year}${month}${day}`
-// });
-//   }
