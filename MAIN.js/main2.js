@@ -64,6 +64,7 @@ fetch('GEOJSON_file/result/')
     // 創建 管理GEOJSON檔案群集圖層(markerClusterGroup)物件 放入 {}
     var boatLayers = {}
     var boatLayers_AIS = {}
+    var boatLayers_AIS_boat = {}
     var dates = []
     GeoJSONboatfileNames.forEach( function (fileName_fordates) {
       // 提取日期部分（從位置17到25）, fileName的長相: S1A_IW_GRDH_1SDV_20230719T100133_20230719T100158_049491_05F383_61E2_exp7
@@ -91,7 +92,7 @@ fetch('GEOJSON_file/result/')
       var day   = date.substring(8, 10)
       boatLayers    [`${year}${month}${day}`] = L.markerClusterGroup();
       boatLayers_AIS[`${year}${month}${day}`] = L.markerClusterGroup();
-
+      boatLayers_AIS_boat[`${year}${month}${day}`] = L.markerClusterGroup();
     }
 
     // 自定義boat圖示
@@ -101,7 +102,12 @@ fetch('GEOJSON_file/result/')
     });
 
     var customIcon2 = L.icon({
-      iconUrl: 'ICON/AIS_boat_icon.png',  // 替換為你的圖示圖片的URL
+      iconUrl: 'ICON/AIS_icon.png',  // 替換為你的圖示圖片的URL
+      iconSize: [16, 16],  // 設定圖示的尺寸
+    });
+
+    var customIcon3 = L.icon({
+      iconUrl: 'ICON/match_icon.png',  // 替換為你的圖示圖片的URL
       iconSize: [16, 16],  // 設定圖示的尺寸
     });
 
@@ -111,28 +117,28 @@ fetch('GEOJSON_file/result/')
     // 第一個參數要丟處理好可給$.getJSON讀取的路徑，第二個參數丟檔案名稱
     function processGeoJSONFile(filePath, fileName) {
       // 使用 $.getJSON 載入並處理 GEOJSON 檔案
-      if (fileName.length > 65) {
+      if (fileName.includes("S1A")) {
         $.getJSON(filePath, function (data) {
         var boat_geoJSON = L.geoJSON(data, {
           pointToLayer: function (feature, latlng) {
             // 使用自定義圖標創建標記
-              var temp_mark = L.marker(latlng, { icon: customIcon }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
+              var temp_mark = L.marker(latlng, { icon: customIcon2 }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
               return temp_mark;
             }
           })
-          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
+          boat_geoJSON.addTo(boatLayers_AIS[`${fileName.substring(17, 25)}`]);
       });
       }
-      else if (fileName.length > 65) {
+      else if (fileName.includes("match")) {
         $.getJSON(filePath, function (data) {
         var boat_geoJSON = L.geoJSON(data, {
           pointToLayer: function (feature, latlng) {
             // 使用自定義圖標創建標記
-              var temp_mark = L.marker(latlng, { icon: customIcon }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
+              var temp_mark = L.marker(latlng, { icon: customIcon3 }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.ship_name + "</div>");
               return temp_mark;
             }
           })
-          boat_geoJSON.addTo(boatLayers[`${fileName.substring(17, 25)}`]);
+          boat_geoJSON.addTo(boatLayers_AIS_boat[`${fileName.substring(0, 8)}`]);
       });
       }
       else {
@@ -140,11 +146,11 @@ fetch('GEOJSON_file/result/')
         var boat_geoJSON = L.geoJSON(data, {
           pointToLayer: function (feature, latlng) {
             // 使用自定義圖標創建標記
-              var temp_mark = L.marker(latlng, { icon: customIcon2 }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.MMSI + "</div>");
+              var temp_mark = L.marker(latlng, { icon: customIcon }).bindPopup("<div style='text-align: center;'>--船名--<br>" + feature.properties.MMSI + "</div>");
               return temp_mark;
             }
           })
-          boat_geoJSON.addTo(boatLayers_AIS[`${fileName.substring( 0,8)}`]);
+          boat_geoJSON.addTo(boatLayers[`${fileName.substring( 0, 8)}`]);
       });
       }
     }
@@ -169,7 +175,9 @@ fetch('GEOJSON_file/result/')
     console.log("GeoJSONboatfileNames", GeoJSONboatfileNames)
     console.log("GeoJSONboatfilesPath", GeoJSONboatfilesPath)
     processGeoJSONFiles(GeoJSONboatfileNames, GeoJSONboatfilesPath);
-    
+    console.log("boatLayers", boatLayers)
+    console.log("boatLayers_AIS", boatLayers_AIS);
+    console.log("boatLayers_AIS_boat", boatLayers_AIS_boat);
     // 走到這裡 會把 boatLayers, boatLayers_AIS 的 Cluster圖層物件 都依據 日期 把 資料點 放入 相應日期的Cluster圖層物件中 囉～
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //  一些 KongButtons 和 slider 會共用到的一些 變數 和 function 都拉到最上面
@@ -212,10 +220,10 @@ fetch('GEOJSON_file/result/')
 
         var layerover = L.DomUtil.create("div", "leaflet-control-layers-overlays", section)
         // ###
-        var image_label = L.DomUtil.create("label", "", layerover)
-        var image_span = L.DomUtil.create("span", "", image_label)
-        var image_check = L.DomUtil.create('input', 'leaflet-control-layers-selector', image_span); image_check.type = "checkbox";
-        var image_span = L.DomUtil.create('span', '', image_span); image_span.innerHTML = "影像";
+        // var image_label = L.DomUtil.create("label", "", layerover)
+        // var image_span = L.DomUtil.create("span", "", image_label)
+        // var image_check = L.DomUtil.create('input', 'leaflet-control-layers-selector', image_span); image_check.type = "checkbox";
+        // var image_span = L.DomUtil.create('span', '', image_span); image_span.innerHTML = "影像";
 
         var boat_label = L.DomUtil.create("label", "", layerover)
         var boat_span = L.DomUtil.create("span", "", boat_label)
@@ -226,6 +234,11 @@ fetch('GEOJSON_file/result/')
         var ais_span = L.DomUtil.create("span", "", ais_label)
         var ais_check = L.DomUtil.create('input', 'leaflet-control-layers-selector', ais_span); ais_check.type = "checkbox";
         var ais_span = L.DomUtil.create('span', '', ais_span); ais_span.innerHTML = "AIS";
+
+        var boat_ais_label = L.DomUtil.create("label", "", layerover)
+        var boat_ais_span = L.DomUtil.create("span", "", boat_ais_label)
+        var boat_ais_check = L.DomUtil.create('input', 'leaflet-control-layers-selector', boat_ais_span); boat_ais_check.type = "checkbox";
+        var boat_ais_span = L.DomUtil.create('span', '', boat_ais_span); boat_ais_span.innerHTML = "船隻&AIS";
 
         // var ais_label = L.DomUtil.create("label", "", layerover)
         // var ais_span = L.DomUtil.create("span", "", ais_label)
@@ -258,6 +271,7 @@ fetch('GEOJSON_file/result/')
           
           // checkbox 打勾 要做的事情:
           var checked_do_things = function (processedLayers) {
+            var processedLayer
             // 移除上次的圖層， 但上次有可能是選擇 "選擇日期"， "選擇日期"沒有圖層不能刪， 所以 checkbox 打勾時 如果 last_option 遇到 "選擇日期" 要跳過
             console.log("checked_do_things~~~~~");
             console.log("last_option", last_option);
@@ -298,7 +312,6 @@ fetch('GEOJSON_file/result/')
             return processedLayers
           }
 
-
           // 如果 船隻 checkbok 打勾/沒打勾 要做的事情
           if (boat_check.checked) { boatLayers =   checked_do_things(processedLayers = boatLayers)}
           else                    { boatLayers = unchecked_do_things(processedLayers = boatLayers)}
@@ -306,8 +319,10 @@ fetch('GEOJSON_file/result/')
           // 如果 船隻ais checkbok 打勾/沒打勾 要做的事情
           if (ais_check.checked) { boatLayers_AIS =   checked_do_things(processedLayers = boatLayers_AIS)}
           else                   { boatLayers_AIS = unchecked_do_things(processedLayers = boatLayers_AIS)}
+        
+          if (boat_ais_check.checked) { boatLayers_AIS_boat =   checked_do_things(processedLayers = boatLayers_AIS_boat)}
+          else                        { boatLayers_AIS_boat = unchecked_do_things(processedLayers = boatLayers_AIS_boat)}
         }
-
 
         // 參考 https://stackoverflow.com/questions/64046196/i%C2%B4m-stucked-creating-a-new-leaflet-custom-control
         L.DomEvent.on(boat_check, 'click' , check_status_of_select_and_checkbox_then_do_things);
@@ -338,6 +353,7 @@ fetch('GEOJSON_file/result/')
         if (last_option !== "選擇日期") {
           boatLayers    [last_option] = update_cluster_layer(boatLayers    [last_option]);
           boatLayers_AIS[last_option] = update_cluster_layer(boatLayers_AIS[last_option]);
+          boatLayers_AIS_boat[last_option] = update_cluster_layer(boatLayers_AIS_boat[last_option]);
         }
       },
  
