@@ -133,20 +133,11 @@ fetch('GEOJSON_file/result/')
         $.getJSON(filePath, function (data) {
           var boat_geoJSON = L.geoJSON(data, {
             onEachFeature: function (feature, layer) {
-              if (feature.geometry.type === "Polygon") {
-                // 获取多边形的坐标
-                var coordinates = feature.geometry.coordinates;
-                var firstCoordinate = coordinates[0][0]; // 第一组坐标点
-                var thirdCoordinate = coordinates[2][0]; // 第三组坐标点
-      
-                // 创建第一组坐标点位的标记并添加到地图
-                L.marker(firstCoordinate, { icon: customIcon1 }).addTo(map);
-                // 创建第三组坐标点位的标记并添加到地图
-                L.marker(thirdCoordinate, { icon: customIcon2 }).addTo(map);
-              }
+              var temp_polygon = L.polygon(feature.geometry.coordinates);
+              return temp_polygon;
             }
           });
-      
+
           boat_geoJSON.addTo(boatLayers_MATCH[`${fileName.substring(0, 8)}`]);
         });
       }
