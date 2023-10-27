@@ -25,7 +25,6 @@ map.addControl(drawControl);
 
 // ###################################################################################################
 
-
 // ###################################################################################################
 
 //設定抓取文件路徑
@@ -137,8 +136,8 @@ fetch('GEOJSON_file/result/')
               // point 是 先丟y再丟x, 跟 polygon相反！ 所以先把 point1,2 的 x, y 抓出來, 再正確的用 y, x 來建立 marker
               point1x = feature.geometry.coordinates[0][0][0]
               point1y = feature.geometry.coordinates[0][0][1]
-              point2x = feature.geometry.coordinates[0][1][0]
-              point2y = feature.geometry.coordinates[0][1][1]
+              point3x = feature.geometry.coordinates[0][2][0]
+              point3y = feature.geometry.coordinates[0][2][1]
               L.marker([point1y, point1x], { icon: customIcon2 }).addTo(boatLayers_MATCH[`${fileName.substring(0, 8)}`]);
               L.marker([point2y, point2x], { icon: customIcon2 }).addTo(boatLayers_MATCH[`${fileName.substring(0, 8)}`]);
               return temp_polygon;
