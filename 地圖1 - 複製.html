@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>圖台</title>
+    <link rel="stylesheet" href="leaflet/css/leaflet.css">
+    <script src="leaflet/js/leaflet.js"></script>
+    <script src="leaflet/js/leaflet-src.esm.js"></script>
+    <script src="leaflet/js/leaflet-src.js"></script>
+    <script src="jquery/jquery-3.7.0.js"></script>
+    
+    <!-- geotiff JS -->
+    <script src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/geotiff.js"></script>
+    <script src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/plotty.js"></script>
+    
+    <script src="leaflet-geotiff.js"></script>
+    <script src="leaflet-geotiff-plotty.js"></script>
+    <script src="leaflet-geotiff-vector-arrows.js"></script>
+        <!-- geotiff JS -->
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+    <style>
+        body{
+
+            margin: 0;
+            padding: 0;
+        }
+                 #headtitle {
+            font-size: 28px;
+            text-align: center;
+                     padding: 10px;  }
+            #map {
+            width: 100%;
+            height: calc(100vh - 58px); /* 計算剩餘視窗高度，扣掉 #headtitle 的高度 */
+        }
+
+    </style>
+</head>     
+<body>
+    <div id="headtitle">建構SAR衛星多時序與近即時海岸帶整合監測平台</div>
+    <div id="map" style="width: 100%;"></div>
+    
+    <script>
+
+        var map = L.map('map',{center:[23.973, 120.979], zoom: 8});   
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom: 14,attribution: '© OpenStreetMap'}).addTo(map);
+  var drawItem = new L.FeatureGroup();
+        map.addLayer(drawItem);
+                var option = {
+            position: 'topleft',
+            collapsed: true,
+            edit: {
+                featureGroup: drawItem,
+            },
+        };
+        var drawControl = new L.Control.Draw(option);
+        map.addControl(drawControl);
+          var imageUrl = 'tiff/TEST.tif';
+  var imageBounds = [
+    [23.8518027096605, 119.59813654817619], // 左下角坐標 [緯度, 經度]
+    [26.020874794695498, 122.44867060774425]  // 右上角坐標 [緯度, 經度]
+  ];
+
+//  var geoTiffLayer = L.leafletGeotiff(imageUrl, imageBounds).addTo(map);
+  var layer = L.leafletGeotiff('subset_1_of_TC.tif').addTo(map);
+
+</script>
+</body>
+</html>
+
+<!-- 那那些leaflet資料夾 也都是你下載的嬤 單純上面只有leaflet是運行檔案要用的，後面有加東西的像是minimapmaste是套件 -->
+<!-- 好吧現在打字太慢用講的才會比較清楚這個先pass好了 -->
+<!-- 這個軟體我也不太會設定ANYDESK，不過你先忙，我在睡一下到:3:ˇ30，fu3tj;6y94d04d0起來再看看TEAMVIE出什麼問題對呀可ㄨ --> 
+<!-- 成功了有做什麼嗎找到另一個連接葉面就成功了 他有兩種連接方式的樣子-->
+<!-- 現在要先幫你看哪個嗎 -->
