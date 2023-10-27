@@ -1,7 +1,7 @@
 ### 參考：https://stackoverflow.com/questions/47308984/how-to-use-python-with-pandas-exporting-data-to-geojson-for-google-map
 import pandas
 import geojson
-from geojson import Feature, FeatureCollection, Point
+from   geojson import Feature, FeatureCollection, Point, Polygon
 import shutil
 import os
 
@@ -39,7 +39,7 @@ def check_csv_have_header_and_do_things(src_path):
             longitude_name = header
 
         elif( ("lat" in header[0:3].lower()) or
-            ("y"   in header    .lower() and len(header) == 1)):
+              ("y"   in header    .lower() and len(header) == 1)):
             latitude_name  = header
 
     ### 走到這裡, 如果 have_header_flag 被設成 True 代表此CSV有 header
@@ -63,6 +63,31 @@ def check_csv_have_header_and_do_things(src_path):
         latitude_name  = "Y"
         longitude_name = "X"
         return datas, longitude_name, latitude_name
+    
+##########################2023/10/26新增(頭)##########################
+def check_csv_with_match_have_header_and_do_things(src_path):
+    datas = pandas.read_csv(src_path)  ### 讀取CSV， 不管有沒有header
+    headers = datas.columns            ### 把 header 抓出來
+    sar_longitude_name = ""                ### 用來記住 header 中 哪個欄位 紀錄 經度(x, longitude)
+    sar_latitude_name  = ""                 ### 用來記住 header 中 哪個欄位 紀錄 緯度(y, latitude)
+    ais_longitude_name = ""
+    ais_latitude_name  = ""
+
+    for header in headers:
+        if    ( ("sarlon" in header.lower()) ):
+              sar_longitude_name = header
+        
+        elif  ( ("sarlat" in header.lower()) ):
+              sar_latitude_name  = header
+
+        elif  ( ("aislon" in header.lower()) ):
+              ais_longitude_name = header
+
+        elif  ( ("aislat" in header.lower()) ):
+              ais_latitude_name  = header
+    
+    return datas, sar_longitude_name, sar_latitude_name, ais_longitude_name, ais_latitude_name
+##########################2023/10/26新增(尾)##########################
 
 def csv_to_geojson(src_path, dst_path):
     datas, longitude_name, latitude_name = check_csv_have_header_and_do_things(src_path)
@@ -144,6 +169,35 @@ def csv_to_geojson(src_path, dst_path):
     with open(dst_path, 'w', encoding='utf-8') as f:
         geojson.dump(feature_collection, f)
 
+##########################2023/10/26新增(頭)##########################
+def csv_with_match_to_geojson(src_path, dst_path):
+    datas, sar_longitude_name, sar_latitude_name, ais_longitude_name, ais_latitude_name = check_csv_with_match_have_header_and_do_things(src_path)
+    datas = datas.replace(np.nan, None)  ### 把 nan 填 None
+
+    features = []
+    for index, row in datas.iterrows():
+        sar_x = row[sar_longitude_name]
+        sar_y = row [sar_latitude_name]
+        ais_x = row[ais_longitude_name]
+        ais_y = row [ais_latitude_name]
+        polygon = Polygon([[(sar_x, sar_y), (sar_x, ais_y), (ais_x, ais_y), (ais_x, sar_y)]])
+        properties = {}
+        for header in datas.columns:
+            if(header != sar_longitude_name and header != sar_latitude_name and header != ais_longitude_name and header != ais_longitude_name):  ### 如果 遇到 longitude 和 latitude 欄位 要跳過, 因為這兩個是 x, y 應該要存在Point()部分, 不應該存在 properties
+                properties[header] = row[header]
+
+        feature = Feature(
+            geometry = polygon,
+            properties = properties
+        )
+
+        features.append(feature)
+
+    feature_collection = FeatureCollection(features=features)
+    
+    with open(dst_path, 'w', encoding='utf-8') as f:
+        geojson.dump(feature_collection, f)
+##########################2023/10/26新增(尾)##########################
 
 def dir_csv_to_geojson(src_dir,finish_dir, dst_dir = "./result_dir"):
     if(os.path.isdir(src_dir) is False):
@@ -153,8 +207,7 @@ def dir_csv_to_geojson(src_dir,finish_dir, dst_dir = "./result_dir"):
     os.makedirs(dst_dir, exist_ok=True)  ### 如果 dst_dir 不存在，建立一個dst_dir
 
     ### 把 src_dir 中 檔名含有".csv" 的 檔名抓出來放進 file_names
-    file_names = [file_name for file_name in os.listdir(src_dir) if (".csv" in file_name.lower()) ]
-
+    file_names = [file_name for file_name in os.listdir(src_dir) if (".csv" in file_name.lower())]
     ### 用 file_name 走訪所有 file_names
     for file_name in file_names:
         half_name = file_name.split(".")[0]  ### 取得 file_name 檔名部分
@@ -162,11 +215,14 @@ def dir_csv_to_geojson(src_dir,finish_dir, dst_dir = "./result_dir"):
         src_path = f"{src_dir}/{half_name}.{extd_name}"  ### 拼出 src_path：來源資料夾/檔名.副檔名(csv)
         finish_path = f"{finish_dir}/{half_name}.{extd_name}"
         dst_path = f"{dst_dir}/{half_name}.geojson"      ### 拼出 dst_path：目的資料夾/檔名.副檔名(geojson)
-        csv_to_geojson(src_path=src_path, dst_path=dst_path)  ### 核心要做的事情 讀取來源路徑的csv檔案 轉成 geojson檔案存入 指定的目的路徑
+        if ("match" not in file_name.lower()):
+            csv_to_geojson      (src_path=src_path, dst_path=dst_path)  ### 核心要做的事情 讀取來源路徑的csv檔案 轉成 geojson檔案存入 指定的目的路徑
+        else:
+            csv_with_match_to_geojson(src_path=src_path, dst_path=dst_path)
         shutil.move(src_path, finish_path)
 
-src_dir = "GEOJSON_file/data/"
-dst_dir = "GEOJSON_file/result/"
+src_dir    = "GEOJSON_file/data/"
+dst_dir    = "GEOJSON_file/result/"
 finish_dir = "GEOJSON_file/data/finish/"
 
 #自動執行
